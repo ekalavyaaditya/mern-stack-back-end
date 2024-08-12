@@ -1,0 +1,2 @@
+:- it is about the create and add of a table where the table is not created in db (mongoDB)
+    *first create a module folder in that create a file and export it into the routes folder in that create a file and then export it into the server.js and create route
