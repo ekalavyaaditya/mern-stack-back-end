@@ -1,7 +1,7 @@
 const mongoose = require ("mongoose");
 const Schema = mongoose.Schema;
 const paymentSchema = new Schema ({
-    userID:{
+    userId:{
         type: Schema.Types.ObjectId,
         required:true
     },
