@@ -9,7 +9,8 @@ const { check, validationResult } = require("express-validator")
 
 router.get("/",auth,async (req,res)=> {
     try{
-        const user = await User.findById(req.user.id).select("password name email");
+        // const user = await User.findById(req.user.id).select("password name email role");
+        const user = await User.findById(req.user.id).select("role name email ");
         res.json(user);
     }
     catch(error){

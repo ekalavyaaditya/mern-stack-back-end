@@ -85,7 +85,6 @@ router.post("/", auth, async (req, res) => {
     const { products } = req.body; // Fixed typo: res.body to req.body
     let cart, unfulfilledCart; // Fixed typo: unfulfiledCart to unfulfilledCart
     const carts = await Cart.find({ userId });
-
     const hasValidCarts = carts.reduce((acc, value) => {
       if (!value.fulfilled) {
         unfulfilledCart = value; // Capture the first unfulfilled cart
