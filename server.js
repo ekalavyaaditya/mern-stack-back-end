@@ -15,6 +15,7 @@ app.use("/api/products", require("./routes/productRoute"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/profile", require("./routes/profileapi"));
 app.use("/api/cart", require("./routes/cart"));
+app.use("/api/payment", require("./routes/payment"));
 app.get("/", (req,res)=>{
     res.send("app is working");
 });
