@@ -1,0 +1,13 @@
+version: '3'
+services:
+  services:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./
+    volumes:
+      - /back-end/node_modules
+      - ./:/back-end
+    environment:
+      - DBPROD=${DBPROD}
+    ports: 
+      - "5000:5000"

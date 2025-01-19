@@ -1,4 +1,5 @@
+require('dotenv').config();
 module.exports={
-    mongoURL: "mongodb+srv://aditya:aditya@mernstack.boi4yaq.mongodb.net/?retryWrites=true&w=majority",
-    jwtSecret: "mernstack",
+    mongoURL: process.env.MONGO_URL,
+    jwtSecret: process.env.JWT_SECRET,
 }

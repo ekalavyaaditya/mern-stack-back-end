@@ -4,7 +4,7 @@ const auth = require("../middleware/authorization")
 const User = require("../moduels/User");
 const jwt = require('jsonwebtoken');
 const config = require("../config/keys");
-const bcrypt = require('bcrypt'); 
+const bcrypt = require('bcryptjs'); 
 const { check, validationResult } = require("express-validator")
 
 router.get("/",auth,async (req,res)=> {
