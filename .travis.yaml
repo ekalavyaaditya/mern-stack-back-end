@@ -8,5 +8,5 @@ script:
 
 after_success:
   - docker build -t backend/server .
-  # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-  # - docker push backend/server
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push backend/server
