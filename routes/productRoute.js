@@ -14,6 +14,8 @@ router.post(
       check("category", "category is require").not().isEmpty(),
       check("price", "price is require").not().isEmpty(),
       check("quantity", "quantity is require").not().isEmpty(),
+      check("brand", "brand is require").not().isEmpty(),
+      check("images", "images is require").not().isEmpty(),   
     ],
   ],
   async (req, res) => {
@@ -22,9 +24,7 @@ router.post(
       return res.status(400).json({ error: error.array() });
     }
     try {
-      console.log(req.body);
-      console.log(req.user);
-      const { name, description, category, price, brand, quantity } = req.body;
+      const { name, description, category, price, brand, quantity, images } = req.body;
       const newProuduct = new Product({
         userId: req.user.id,
         name,
@@ -33,6 +33,7 @@ router.post(
         price,
         brand,
         quantity,
+        images,
       });
       const product = await newProuduct.save();
       res.json({ product });
