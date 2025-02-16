@@ -4,9 +4,6 @@ WORKDIR /server
 
 COPY ./package.json ./
 
-RUN apk update && apk upgrade && \
-    apk add --no-cache base git openshh
-
 RUN npm install
 
 COPY . .
