@@ -2,6 +2,7 @@ const express = require('express');
 const Razorpay = require('razorpay');
 const cors = require('cors');
 const router = express();
+const Payment = require('../moduels/payment');
 
 router.use(cors()); // Enable CORS for the React frontend
 
@@ -13,19 +14,39 @@ const razorpay = new Razorpay({
 
 // Create an order
 router.post('/', async (req, res) => {
-  const { amount } = req.body; // Amount in paise (1 INR = 100 paise)
+  const { amount, userId, products } = req.body; // Expect amount in rupees
+
+  // Validate request body
+  if (!amount || !userId || !products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ error: 'Invalid request data' });
+  }
 
   try {
     const options = {
-      amount: amount * 100, // Convert to paise
+      amount: amount * 100, // Convert rupees to paise
       currency: 'INR',
-      receipt: 'order_receipt_123',
+      receipt: `order_receipt_${Date.now()}`,
       payment_capture: 1,
     };
+
     const order = await razorpay.orders.create(options);
+
+    // Save payment details in MongoDB
+    const payment = new Payment({
+      userId,
+      products, // List of product IDs
+      amount: order.amount,
+      amount_due: order.amount_due,
+      amount_paid: order.amount_paid,
+      attempts: order.attempts,
+      razorpay_order_id: order.id,
+      receipt: order.receipt,
+      status: order.status,
+    });
+    await payment.save();
     res.json(order);
   } catch (error) {
-    console.error(error);
+    console.error('Error creating Razorpay order:', error);
     res.status(500).json({ error: 'Error creating Razorpay order' });
   }
 });
