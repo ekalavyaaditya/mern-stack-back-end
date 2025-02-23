@@ -2,12 +2,28 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authorization");
 const { check, validationResult } = require("express-validator");
+const { Storage } = require("@google-cloud/storage");
+const multer = require("multer");
 const Product = require("../moduels/product");
+const storage = new Storage({
+  projectId: process.env.PROJECT_ID,
+  keyFilename: process.env.GCLOUD_KEY_FILE,
+});
+
+const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 2000 * 1024 * 1024,
+  },
+});
 
 router.post(
   "/",
   [
     auth,
+    upload.array("images", 8),
     [
       check("name", "name is require").not().isEmpty(),
       check("description", "description is require").not().isEmpty(),
@@ -15,7 +31,6 @@ router.post(
       check("price", "price is require").not().isEmpty(),
       check("quantity", "quantity is require").not().isEmpty(),
       check("brand", "brand is require").not().isEmpty(),
-      check("images", "images is require").not().isEmpty(),   
     ],
   ],
   async (req, res) => {
@@ -24,8 +39,30 @@ router.post(
       return res.status(400).json({ error: error.array() });
     }
     try {
-      const { name, description, category, price, brand, quantity, images } = req.body;
-      const newProuduct = new Product({
+      const { name, description, category, price, brand, quantity } = req.body;
+      let imageUrls = [];
+      if (req.files && req.files.length > 0) {
+        const uploadPromises = req.files.map((file) => {
+          return new Promise((resolve, reject) => {
+            const blob = bucket.file(Date.now() + "-" + file.originalname);
+            const blobStream = blob.createWriteStream({
+              resumable: false,
+              contentType: file.mimetype,
+            });
+
+            blobStream.on("finish", async () => {
+              await blob.makePublic();
+              resolve(
+                `https://storage.googleapis.com/${process.env.GCLOUD_STORAGE_BUCKET}/${blob.name}`
+              );
+            });
+            blobStream.on("error", (err) => reject(err));
+            blobStream.end(file.buffer);
+          });
+        });
+        imageUrls = await Promise.all(uploadPromises);
+      }
+      const newProduct = new Product({
         userId: req.user.id,
         name,
         description,
@@ -33,9 +70,9 @@ router.post(
         price,
         brand,
         quantity,
-        images,
+        images: imageUrls,
       });
-      const product = await newProuduct.save();
+      const product = await newProduct.save();
       res.json({ product });
     } catch (error) {
       console.error(error.message);

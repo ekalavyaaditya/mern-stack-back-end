@@ -1,6 +1,8 @@
-FROM node:20.18.1-alpine3.20
-WORKDIR /server
-COPY ./package.json ./
-RUN npm install
+FROM node:20.18.0-alpine
+WORKDIR /back-end
+COPY ./package-lock.json ./
+RUN npm install -fouse
+RUN npm install nodemon -g
 COPY . .
-CMD [ "npm", "start" ]
+# CMD [ "npm", "start" ]
+CMD ["node", "server.js"]
