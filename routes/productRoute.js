@@ -42,19 +42,27 @@ router.post(
       const { name, description, category, price, brand, quantity } = req.body;
       let imageUrls = [];
       if (req.files && req.files.length > 0) {
+        console.log(
+          "📷 Uploaded Files:",
+          req.files.map((f) => f.originalname)
+        );
         const uploadPromises = req.files.map((file) => {
           return new Promise((resolve, reject) => {
             const blob = bucket.file(Date.now() + "-" + file.originalname);
             const blobStream = blob.createWriteStream({
               resumable: false,
-              contentType: file.mimetype,
+              // contentType: file.mimetype,
+              contentType: "image/jpeg",
             });
 
             blobStream.on("finish", async () => {
               await blob.makePublic();
-              resolve(
-                `https://storage.googleapis.com/${process.env.GCLOUD_STORAGE_BUCKET}/${blob.name}`
-              );
+              const publicUrl = `https://storage.googleapis.com/${process.env.GCLOUD_STORAGE_BUCKET}/${blob.name}`;
+              // resolve(
+              //   `https://storage.googleapis.com/${process.env.GCLOUD_STORAGE_BUCKET}/${blob.name}`
+              // );
+              console.log("Uploaded Image URL:", publicUrl);
+              resolve(publicUrl);
             });
             blobStream.on("error", (err) => reject(err));
             blobStream.end(file.buffer);
@@ -62,6 +70,7 @@ router.post(
         });
         imageUrls = await Promise.all(uploadPromises);
       }
+      console.log("🌐 Final Image URLs:", imageUrls);
       const newProduct = new Product({
         userId: req.user.id,
         name,
@@ -73,6 +82,7 @@ router.post(
         images: imageUrls,
       });
       const product = await newProduct.save();
+      console.log("Product Saved Successfully:", product);
       res.json({ product });
     } catch (error) {
       console.error(error.message);
